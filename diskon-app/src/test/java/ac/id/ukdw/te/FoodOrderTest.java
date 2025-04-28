@@ -1,4 +1,4 @@
-package ac.id.ukdw.te.tugas2;
+package ac.id.ukdw.te;
 
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -6,6 +6,10 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+
+import ac.id.ukdw.te.tugas2.FoodDeliveryService;
+import ac.id.ukdw.te.tugas2.FoodOrder;
+import ac.id.ukdw.te.tugas2.UserAccount;
 
 class FoodOrderTest {
 
