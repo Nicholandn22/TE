@@ -1,11 +1,15 @@
 package ac.id.ukdw.te;
 
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
+
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import ac.id.ukdw.te.tugas2.FoodDeliveryService;
 import ac.id.ukdw.te.tugas2.FoodOrder;
@@ -13,48 +17,49 @@ import ac.id.ukdw.te.tugas2.UserAccount;
 
 class FoodOrderTest {
 
-    private UserAccount userAccountMock;
-    private FoodDeliveryService foodDeliveryServiceMock;
-    private FoodOrder foodOrder;
-
-    @BeforeEach
-    void setUp() {
-        userAccountMock = mock(UserAccount.class);
-        foodDeliveryServiceMock = mock(FoodDeliveryService.class);
-        foodOrder = new FoodOrder(userAccountMock, foodDeliveryServiceMock);
-    }
-
     @Test
     void testPlaceOrder_SufficientBalance() {
         // Arrange
-        String foodItem = "Nasi Goreng";
-        double price = 50000.0;
-        String address = "Jl. Malioboro No.1";
+        UserAccount mockUserAccount = mock(UserAccount.class);
+        FoodDeliveryService mockDeliveryService = mock(FoodDeliveryService.class);
 
-        // Stub: saldo cukup
-        when(userAccountMock.hasSufficientBalance(price)).thenReturn(true);
+        when(mockUserAccount.hasSufficientBalance(50.0)).thenReturn(true);
+
+        FoodOrder order = new FoodOrder(mockUserAccount, mockDeliveryService);
 
         // Act
-        foodOrder.placeOrder(foodItem, price, address);
+        order.placeOrder("Ayam Bakar", 50.0, "Jl. Merdeka 10");
 
-        // Assert + Verify
-        verify(foodDeliveryServiceMock, times(1)).deliverFood(foodItem, address);
+        // Assert
+        verify(mockUserAccount).hasSufficientBalance(50.0);
+        verify(mockDeliveryService).deliverFood("Ayam Bakar", "Jl. Merdeka 10");
     }
 
     @Test
     void testPlaceOrder_InsufficientBalance() {
         // Arrange
-        String foodItem = "Mie Ayam";
-        double price = 70000.0;
-        String address = "Jl. Solo No.2";
+        UserAccount mockUserAccount = mock(UserAccount.class);
+        FoodDeliveryService mockDeliveryService = mock(FoodDeliveryService.class);
 
-        // Stub: saldo tidak cukup
-        when(userAccountMock.hasSufficientBalance(price)).thenReturn(false);
+        when(mockUserAccount.hasSufficientBalance(100.0)).thenReturn(false);
+
+        FoodOrder order = new FoodOrder(mockUserAccount, mockDeliveryService);
+
+        // Tangkap output konsol
+        ByteArrayOutputStream consoleOutput = new ByteArrayOutputStream();
+        System.setOut(new PrintStream(consoleOutput));
 
         // Act
-        foodOrder.placeOrder(foodItem, price, address);
+        order.placeOrder("Burger", 100.0, "Jl. Kenanga 5");
 
-        // Assert + Verify
-        verify(foodDeliveryServiceMock, never()).deliverFood(anyString(), anyString());
+        // Assert
+        verify(mockUserAccount).hasSufficientBalance(100.0);
+        verify(mockDeliveryService, never()).deliverFood(anyString(), anyString());
+
+        String expectedOutput = "Saldo tidak cukup untuk melakukan pemesanan." + System.lineSeparator();
+        assertEquals(expectedOutput, consoleOutput.toString());
+
+        // Reset System.out
+        System.setOut(System.out);
     }
 }
